@@ -1,5 +1,5 @@
-CXX=g++
-CXXFLAGS=-Wall -std=gnu++0x
+CXX=g++-4.7
+CXXFLAGS=-g -Wall -std=gnu++0x
 LDFLAGS=
 
 all: pmake.o

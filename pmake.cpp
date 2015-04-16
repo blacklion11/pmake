@@ -4,24 +4,15 @@
 #include <map>
 #include <set>
 
-using namespace std;
+#include "pmake.h"
+
+//using namespace std;
 
 typedef map<string, string> Map;
 typedef map<string, Node> Rules;
 
-
-/* Node struct for storing rules */
-typedef struct 
-{
-    string target;
-    set<string> sources;
-    string command;
-    time_t timestamp;
-} Node;
-
-
 /* get and returns variables from the makefile */
-Map get_variables(ifstream file)
+Map get_variables(ifstream &file)
 {
     Map variables;
 
@@ -46,7 +37,7 @@ Map get_variables(ifstream file)
 }
 
 /* Get rules */
-Rules get_rules(ifstream file)
+Rules get_rules(ifstream &file)
 {
     Rules rules;
 
@@ -60,7 +51,7 @@ Rules get_rules(ifstream file)
             string target = line.substr(0, line.find(":") - 1);
             
             set<string> sources;
-            string sources_string = line.substring(line.find(":") + 1, string::npos);
+            string sources_string = line.substr(line.find(":") + 1, string::npos);
             /* split string into the set of sources */
         }
     }
