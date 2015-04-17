@@ -3,80 +3,46 @@
 #include <string>
 #include <map>
 #include <set>
+#include <regex>
 
 #include "pmake.h"
 
-//using namespace std;
-
 typedef map<string, string> Map;
-typedef map<string, Node> Rules;
+typedef map<string, Map> Mom; // Make Object Model
 
-/* get and returns variables from the makefile */
-Map get_variables(ifstream &file)
+static Mom OM;
+
+/* ifstream's deconstructor (which is called when the scope is exited
+ * takes care of file closure. So parsing can be wholly subroutined. */
+bool parse_makefile(Mom &om,  string path)
 {
-    Map variables;
+    ifstream file (path);
+    bool file_opened = file.good();
+    if (file_opened) {
 
-    string line;
-
-    while( getline(file, line))
-    {
-        if(line.find("=") != string::npos)
-        {
-            /* Read in and assign variables into map */
-            string value = line.substr(line.find("="), string::npos);
-            value = value.substr(1, string::npos);
-
-            string name = line.substr(0, line.find("=") - 1);
-
-            variables[name] = value;
-
+        // Iterate over file lines.
+        for (string line; getline(file, line);) {
+            size_t pos;
+            if ((pos = line.find("=")) != string::npos
+                    && isspace(line[0])) {
+                om["variables"][line.substr(0, pos - 1)]
+                    = line.substr(pos + 1, string::npos);
+            } else if ((pos = line.find(":")) != string::npos) {
+                // rule has a dependency list and an execution string
+            }
+        }
+        for (auto it = om["rules"].begin(); it != om["rules"].end(); it++) {
+            cout << it->second << endl;
         }
     }
 
-    return variables;
+    // If the file failed to open we want to know.
+    return file_opened;
 }
-
-/* Get rules */
-Rules get_rules(ifstream &file)
-{
-    Rules rules;
-
-    string line;
-
-    while( getline(file, line))
-    {
-        if(line.find(":") != string::npos)
-        {
-            /* Read in and assign rules */
-            string target = line.substr(0, line.find(":") - 1);
-            
-            set<string> sources;
-            string sources_string = line.substr(line.find(":") + 1, string::npos);
-            /* split string into the set of sources */
-        }
-    }
-
-}
-
-
-
 
 int main(int argc, char **argv)
 {
-    
-    ifstream file;
-    file.open("Makefile");
-
-    Map vars = get_variables(file);
-    Rules rules = get_rules(file);
-
-    file.close();
-
-    cout << "-----Variables-----" << endl;
-    for (auto it = vars.begin(); it != vars.end(); it++)
-    {
-        cout <<  it->first << " = " << it->second << endl;
-    }
+    parse_makefile(OM, "Makefile");
 
     return 0;
 }
